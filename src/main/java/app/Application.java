@@ -66,7 +66,7 @@ public static final int C_RAD_IN_PX = 4;
             }
         }
 
-        label = new Label(window, false, PANEL_BACKGROUND_COLOR, PANEL_PADDING, "Привет, мир!");
+        label = new Label(window, true, PANEL_BACKGROUND_COLOR, PANEL_PADDING, "Привет, мир!",true,true);
         if (window._layer == null)
             throw new RuntimeException("Нет доступных слоёв для создания");
     }
