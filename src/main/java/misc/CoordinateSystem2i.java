@@ -14,6 +14,57 @@ public class CoordinateSystem2i {
      */
     private final Vector2i max;
     /**
+     * Получить координаты вектора в текущей системе координат
+     *
+     * @param coords           координаты вектора в другой системе координат
+     * @param coordinateSystem система координат, в которой заданы координаты вектора
+     * @return координаты вектора в текущей системе координат
+     */
+    public Vector2i getCoords(Vector2d coords, CoordinateSystem2d coordinateSystem) {
+        return getCoords(coords.x, coords.y, coordinateSystem);
+    }
+
+    /**
+     * Получить координаты вектора в текущей системе координат
+     *
+     * @param x                координата X вектора в другой системе координат
+     * @param y                координата Y вектора в другой системе координат
+     * @param coordinateSystem система координат, в которой заданы координаты вектора
+     * @return координаты вектора в текущей системе координат
+     */
+    public Vector2i getCoords(double x, double y, CoordinateSystem2d coordinateSystem) {
+        return new Vector2i(
+                (int) ((x - coordinateSystem.getMin().x) * (size.x - 1) / coordinateSystem.getSize().x + min.x),
+                (int) ((y - coordinateSystem.getMin().y) * (size.y - 1) / coordinateSystem.getSize().y + min.y)
+        );
+    }
+
+    /**
+     * Получить координаты вектора в текущей системе координат
+     *
+     * @param coords           координаты вектора в другой системе координат
+     * @param coordinateSystem система координат, в которой заданы координаты вектора
+     * @return координаты вектора в текущей системе координат
+     */
+    public Vector2i getCoords(Vector2i coords, CoordinateSystem2i coordinateSystem) {
+        return this.getCoords(coords.x, coords.y, coordinateSystem);
+    }
+
+    /**
+     * Получить координаты вектора в текущей системе координат
+     *
+     * @param x                координата X вектора в другой системе координат
+     * @param y                координата Y вектора в другой системе координат
+     * @param coordinateSystem система координат, в которой заданы координаты вектора
+     * @return координаты вектора в текущей системе координат
+     */
+    public Vector2i getCoords(int x, int y, CoordinateSystem2i coordinateSystem) {
+        return new Vector2i(
+                (x - coordinateSystem.min.x) * (size.x - 1) / (coordinateSystem.size.x - 1) + min.x,
+                (y - coordinateSystem.min.y) * (size.y - 1) / (coordinateSystem.size.y - 1) + min.y
+        );
+    }
+    /**
      * минимальная координата
      */
     private final Vector2i min;

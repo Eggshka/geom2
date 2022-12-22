@@ -21,6 +21,7 @@ public class CoordinateSystem2d {
      */
     private Vector2d size;
 
+
     /**
      * Конструктор ограниченной двумерной вещественной системы координат
      *

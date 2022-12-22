@@ -116,6 +116,7 @@ public class Point {
         // приводим переданный в параметрах объект к текущему классу
         Point point = (Point) o;
         return pointSet.equals(point.pointSet) && Objects.equals(pos, point.pos);
+
     }
 
     /**
@@ -126,5 +127,6 @@ public class Point {
     @Override
     public int hashCode() {
         return Objects.hash(pointSet, pos);
+
     }
 }
