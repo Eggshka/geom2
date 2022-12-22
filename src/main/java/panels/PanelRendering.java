@@ -1,5 +1,6 @@
 package panels;
 
+import app.Task;
 import controls.Label;
 import io.github.humbleui.jwm.*;
 import io.github.humbleui.skija.Canvas;
@@ -16,7 +17,10 @@ public class PanelRendering extends GridPanel {
      * Заголовок
      */
     private final Label label;
-
+    /**
+     * Представление проблемы
+     */
+    public static Task task;
     /**
      * Панель управления
      *
