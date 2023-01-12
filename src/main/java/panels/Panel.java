@@ -1,10 +1,12 @@
 package panels;
 
 import io.github.humbleui.jwm.Event;
+import io.github.humbleui.jwm.EventMouseMove;
 import io.github.humbleui.jwm.Window;
 import io.github.humbleui.skija.Canvas;
 import io.github.humbleui.skija.Paint;
 import misc.CoordinateSystem2i;
+import misc.Vector2i;
 
 import java.util.function.Consumer;
 
@@ -19,6 +21,44 @@ public abstract class Panel implements Consumer<Event> {
      * отступ в пикселях
      */
     protected int padding;
+    /**
+     * Проверка, содержит ли панель координаты
+     *
+     * @param pos положение
+     * @return флаг, содержит или нет
+     */
+    public boolean contains(Vector2i pos) {
+        if (lastWindowCS != null)
+            return lastWindowCS.checkCoords(pos);
+        return false;
+    }
+    /**
+     * Обработчик событий
+     * при перегрузке обязателен вызов реализации предка
+     *
+     * @param e событие
+     */
+    @Override
+    public void accept(Event e) {
+        if (e instanceof EventMouseMove ee) {
+            // сохраняем последнее положение мыши
+            lastMove = new Vector2i(ee);
+            // сохраняем флаг, был ли курсор внутри панели
+            lastInside = contains(lastMove);
+        }
+    }
+    /**
+     * последнее движение мыши
+     */
+    protected Vector2i lastMove = new Vector2i(0, 0);
+    /**
+     * было ли оно внутри панели
+     */
+    protected boolean lastInside = false;
+    /**
+     * последняя СК окна
+     */
+    protected CoordinateSystem2i lastWindowCS;
     /**
      * переменная окна
      */
@@ -65,6 +105,7 @@ public abstract class Panel implements Consumer<Event> {
         canvas.translate(windowCS.getMin().x, windowCS.getMin().y);
         paintImpl(canvas, windowCS);
         canvas.restore();
+        lastWindowCS = windowCS;
     }
 
     /**

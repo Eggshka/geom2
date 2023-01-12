@@ -1,10 +1,12 @@
 package app;
 
+import io.github.humbleui.jwm.MouseButton;
 import io.github.humbleui.skija.Canvas;
 import io.github.humbleui.skija.Paint;
 import io.github.humbleui.skija.Rect;
 import misc.CoordinateSystem2d;
 import misc.CoordinateSystem2i;
+import misc.Vector2d;
 import misc.Vector2i;
 
 import java.util.ArrayList;
@@ -17,9 +19,50 @@ public class Task {    /**
  */
 private static final int POINT_SIZE = 3;
     /**
+     * Добавить точку
+     *
+     * @param pos      положение
+     * @param pointSet множество
+     */
+    public void addPoint(Vector2d pos, Point.PointSet pointSet) {
+        Point newPoint = new Point(pos, pointSet);
+        points.add(newPoint);
+    }
+
+    /**
      * Вещественная система координат задачи
      */
     private final CoordinateSystem2d ownCS;
+    /**
+     * последнее движение мыши
+     */
+    protected Vector2i lastMove = new Vector2i(0, 0);
+    /**
+     * было ли оно внутри панели
+     */
+    protected boolean lastInside = false;
+    /**
+     * последняя СК окна
+     */
+    protected CoordinateSystem2i lastWindowCS;
+    /**
+     * Клик мыши по пространству задачи
+     *
+     * @param pos         положение мыши
+     * @param mouseButton кнопка мыши
+     */
+    public void click(Vector2i pos, MouseButton mouseButton) {
+        if (lastWindowCS == null) return;
+        // получаем положение на экране
+        Vector2d taskPos = ownCS.getCoords(pos, lastWindowCS);
+        // если левая кнопка мыши, добавляем в первое множество
+        if (mouseButton.equals(MouseButton.PRIMARY)) {
+            addPoint(taskPos, Point.PointSet.FIRST_SET);
+            // если правая, то во второе
+        } else if (mouseButton.equals(MouseButton.SECONDARY)) {
+            addPoint(taskPos, Point.PointSet.SECOND_SET);
+        }
+    }
     /**
      * Список точек
      */
@@ -58,6 +101,7 @@ private static final int POINT_SIZE = 3;
                 // а в классическом представлении - вверх
                 Vector2i windowPos = windowCS.getCoords(p.pos.x, p.pos.y, ownCS);
                 canvas.drawRect(Rect.makeXYWH(windowPos.x - POINT_SIZE, windowPos.y - POINT_SIZE, POINT_SIZE * 2, POINT_SIZE * 2), paint);
+                lastWindowCS = windowCS;
             }
         }
         canvas.restore();

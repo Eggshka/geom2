@@ -71,28 +71,6 @@ public static final int C_RAD_IN_PX = 4;
      */
     public Application() {
         window = App.makeWindow();
-        window.setEventListener(this);
-        window.setVisible(true);
-        window.setTitle("Java 2D");
-        window.setWindowSize(900, 900);
-        window.setWindowPosition(100, 100);
-        switch (Platform.CURRENT) {
-            case WINDOWS -> window.setIcon(new File("src/main/resources/windows.ico"));
-            case MACOS -> window.setIcon(new File("src/main/resources/macos.icns"));
-        }
-        String[] layerNames = new String[]{
-                "LayerGLSkija", "LayerRasterSkija"
-        };
-        for (String layerName : layerNames) {
-            String className = "io.github.humbleui.jwm.skija." + layerName;
-            try {
-                Layer layer = (Layer) Class.forName(className).getDeclaredConstructor().newInstance();
-                window.setLayer(layer);
-                break;
-            } catch (Exception e) {
-                System.out.println("Ошибка создания слоя " + className);
-            }
-        }
         // создаём панель рисования
         panelRendering = new PanelRendering(
                 window, true, PANEL_BACKGROUND_COLOR, PANEL_PADDING, 5, 3, 0, 0,
@@ -113,6 +91,29 @@ public static final int C_RAD_IN_PX = 4;
                 window, true, PANEL_BACKGROUND_COLOR, PANEL_PADDING, 5, 3, 3, 2,
                 2, 1
         );
+        window.setEventListener(this);
+        window.setVisible(true);
+        window.setTitle("Java 2D");
+        window.setWindowSize(900, 900);
+        window.setWindowPosition(100, 100);
+        switch (Platform.CURRENT) {
+            case WINDOWS -> window.setIcon(new File("src/main/resources/windows.ico"));
+            case MACOS -> window.setIcon(new File("src/main/resources/macos.icns"));
+        }
+        String[] layerNames = new String[]{
+                "LayerGLSkija", "LayerRasterSkija"
+        };
+
+        for (String layerName : layerNames) {
+            String className = "io.github.humbleui.jwm.skija." + layerName;
+            try {
+                Layer layer = (Layer) Class.forName(className).getDeclaredConstructor().newInstance();
+                window.setLayer(layer);
+                break;
+            } catch (Exception e) {
+                System.out.println("Ошибка создания слоя " + className);
+            }
+        }
 
         label = new Label(window, true, PANEL_BACKGROUND_COLOR, PANEL_PADDING,
                 4, 4, 1, 1, 1, 1, "Привет, мир!", true, true);
@@ -143,6 +144,9 @@ public static final int C_RAD_IN_PX = 4;
             Surface s = ee.getSurface();
             paint(s.getCanvas(), new CoordinateSystem2i(s.getWidth(), s.getHeight()));
         }
+        panelControl.accept(e);
+        panelRendering.accept(e);
+        panelLog.accept(e);
     }
     /**
      * Рисование
