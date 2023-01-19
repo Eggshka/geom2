@@ -65,7 +65,14 @@ public static final int C_RAD_IN_PX = 4;
      */
 
     private final Window window;
-
+    /**
+     * кнопка изменений: у мака - это `Command`, у windows - `Ctrl`
+     */
+    public static final KeyModifier MODIFIER = Platform.CURRENT == Platform.MACOS ? KeyModifier.MAC_COMMAND : KeyModifier.CONTROL;
+    /**
+     * флаг того, что окно развёрнуто на весь экран
+     */
+    private boolean maximizedWindow;
     /**
      * конструктор класса приложение
      */
@@ -131,18 +138,56 @@ public static final int C_RAD_IN_PX = 4;
 
     /**
      * Обработчик событий
-     * @param e the input argument
+     *
+     * @param e событие
      */
     @Override
     public void accept(Event e) {
+        // если событие - это закрытие окна
         if (e instanceof EventWindowClose) {
+            // завершаем работу приложения
             App.terminate();
-        }else if (e instanceof EventWindowCloseRequest) {
+        } else if (e instanceof EventWindowCloseRequest) {
             window.close();
-        }
-        else if (e instanceof EventFrameSkija ee) {
+        } else if (e instanceof EventFrame) {
+            // запускаем рисование кадра
+            window.requestFrame();
+        } else if (e instanceof EventFrameSkija ee) {
+            // получаем поверхность рисования
             Surface s = ee.getSurface();
+            // очищаем её канвас заданным цветом
             paint(s.getCanvas(), new CoordinateSystem2i(s.getWidth(), s.getHeight()));
+        }// кнопки клавиатуры
+        else if (e instanceof EventKey eventKey) {
+            // кнопка нажата с Ctrl
+            if (eventKey.isPressed()) {
+                if (eventKey.isModifierDown(MODIFIER))
+                    // разбираем, какую именно кнопку нажали
+                    switch (eventKey.getKey()) {
+                        case W -> window.close();
+                        case H -> window.minimize();
+                        case S -> PanelRendering.save();
+                        case O -> PanelRendering.load();
+                        case DIGIT1 -> {
+                            if (maximizedWindow)
+                                window.restore();
+                            else
+                                window.maximize();
+                            maximizedWindow = !maximizedWindow;
+                        }
+                        case DIGIT2 -> window.setOpacity(window.getOpacity() == 1f ? 0.5f : 1f);
+                    }
+                else
+                    switch (eventKey.getKey()) {
+                        case ESCAPE -> {
+                            window.close();
+                            // завершаем обработку, иначе уже разрушенный контекст
+                            // будет передан панелям
+                            return;
+
+                        }
+                    }
+            }
         }
         panelControl.accept(e);
         panelRendering.accept(e);
