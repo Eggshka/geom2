@@ -1,5 +1,6 @@
 package app;
 
+import controls.InputFactory;
 import controls.Label;
 import io.github.humbleui.jwm.*;
 import io.github.humbleui.jwm.skija.EventFrameSkija;
@@ -186,6 +187,7 @@ public static final int C_RAD_IN_PX = 4;
                             return;
 
                         }
+                        case TAB -> InputFactory.nextTab();
                     }
             }
         }
