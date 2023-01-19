@@ -26,8 +26,10 @@ public class Colors {
      * цвет подложки панелей
      */
     public static final int PANEL_BACKGROUND_COLOR = Misc.getColor(32, 0, 0, 0);
-
-
+    /**
+     * Цвет кнопки
+     */
+    public static final int BUTTON_COLOR = Misc.getColor(80, 0, 0, 0);
     /**
      * Запрещённый конструктор
      */
