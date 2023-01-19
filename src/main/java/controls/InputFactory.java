@@ -23,6 +23,14 @@ public class InputFactory {
      * флаг, нужно ли рисовать курсоа
      */
     private static boolean cursorDraw = true;
+    /**
+     * Снять фокус со всех полей ввода
+     */
+    public static void defocusAll() {
+        // снимаем фокусы
+        for (Input input : inputs)
+            input.focused = false;
+    }
 
     static {
         // запускаем таймер, срабатывающий каждые 500 мс
