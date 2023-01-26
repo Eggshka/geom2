@@ -83,6 +83,7 @@ private static final int POINT_SIZE = 3;
                 addPoint(pos, Point.PointSet.SECOND_SET);
         }
     }
+
     /**
      * последнее движение мыши
      */

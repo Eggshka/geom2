@@ -153,6 +153,7 @@ public class PanelControl extends GridPanel {
                 PanelRendering.task.addRandomPoints(cntField.intValue());
         });
         buttons.add(addPoints);
+
         // управление
         Button load = new Button(
                 window, false, backgroundColor, PANEL_PADDING,
