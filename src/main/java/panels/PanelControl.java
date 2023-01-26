@@ -28,6 +28,7 @@ public class PanelControl extends GridPanel {
     /**
      * Заголовки
      */
+
     public List<Label> labels;
     /**
      * Поля ввода
