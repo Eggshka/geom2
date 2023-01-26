@@ -37,6 +37,19 @@ public class PanelControl extends GridPanel {
      * Кнопки
      */
     public List<Button> buttons;
+    /**
+     * Кнопка "решить"
+     */
+    private final Button solve;
+    /**
+     * Сброс решения задачи
+     */
+    private void cancelTask() {
+        PanelRendering.task.cancel();
+        // Задаём новый текст кнопке решения
+        solve.text = "Решить";
+    }
+
 
     /**
      * Панель управления
@@ -117,6 +130,61 @@ public class PanelControl extends GridPanel {
             }
         });
         buttons.add(addToSecondSet);
+        // случайное добавление
+        Label cntLabel = new Label(window, false, backgroundColor, PANEL_PADDING,
+                6, 7, 0, 4, 1, 1, "Кол-во", true, true);
+        labels.add(cntLabel);
+
+        Input cntField = InputFactory.getInput(window, false, FIELD_BACKGROUND_COLOR, PANEL_PADDING,
+                6, 7, 1, 4, 2, 1, "5", true,
+                FIELD_TEXT_COLOR, true);
+        inputs.add(cntField);
+
+        Button addPoints = new Button(
+                window, false, backgroundColor, PANEL_PADDING,
+                6, 7, 3, 4, 3, 1, "Добавить\nслучайные точки",
+                true, true);
+        addPoints.setOnClick(() -> {
+            // если числа введены верно
+            if (!cntField.hasValidIntValue()) {
+                PanelLog.warning("кол-во точек указано неверно");
+            } else
+                PanelRendering.task.addRandomPoints(cntField.intValue());
+        });
+        buttons.add(addPoints);
+        // управление
+        Button load = new Button(
+                window, false, backgroundColor, PANEL_PADDING,
+                6, 7, 0, 5, 3, 1, "Загрузить",
+                true, true);
+        load.setOnClick(() -> {
+            PanelRendering.load();
+            cancelTask();
+        });
+        buttons.add(load);
+
+        Button save = new Button(
+                window, false, backgroundColor, PANEL_PADDING,
+                6, 7, 3, 5, 3, 1, "Сохранить",
+                true, true);
+        save.setOnClick(PanelRendering::save);
+        buttons.add(save);
+
+        Button clear = new Button(
+                window, false, backgroundColor, PANEL_PADDING,
+                6, 7, 0, 6, 3, 1, "Очистить",
+                true, true);
+        clear.setOnClick(() -> PanelRendering.task.clear());
+        buttons.add(clear);
+
+        solve = new Button(
+                window, false, backgroundColor, PANEL_PADDING,
+                6, 7, 3, 6, 3, 1, "Решить",
+                true, true);
+        solve.setOnClick(() -> {
+            PanelRendering.task.solve();
+        });
+        buttons.add(solve);
     }
 
     /**
@@ -200,5 +268,6 @@ public class PanelControl extends GridPanel {
         for (Label label : labels) {
             label.paint(canvas, windowCS);
         }
+
     }
 }
