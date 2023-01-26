@@ -30,19 +30,25 @@ private static final int POINT_SIZE = 3;
      */
     public void clear() {
         points.clear();
+        solved = false;
     }
     /**
      * Решить задачу
      */
     public void solve() {
+        solved = true;
         PanelLog.warning("Вызван метод solve()\n Пока что решения нет");
     }
     /**
      * Отмена решения задачи
      */
     public void cancel() {
-
+        solved = false;
     }
+    /**
+     * Флаг, решена ли задача
+     */
+    private boolean solved;
     /**
      * Добавить точку
      *
@@ -50,10 +56,18 @@ private static final int POINT_SIZE = 3;
      * @param pointSet множество
      */
     public void addPoint(Vector2d pos, Point.PointSet pointSet) {
+        solved = false;
         Point newPoint = new Point(pos, pointSet);
         points.add(newPoint);
-        // Добавляем в лог запись информации
         PanelLog.info("точка " + newPoint + " добавлена в " + newPoint.getSetName());
+    }
+    /**
+     * проверка, решена ли задача
+     *
+     * @return флаг
+     */
+    public boolean isSolved() {
+        return solved;
     }
     /**
      * Добавить случайные точки
