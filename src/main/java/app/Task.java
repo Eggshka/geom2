@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.github.humbleui.jwm.MouseButton;
 import io.github.humbleui.skija.Canvas;
 import io.github.humbleui.skija.Paint;
+import io.github.humbleui.skija.PaintMode;
 import io.github.humbleui.skija.Rect;
 import lombok.Getter;
 import misc.CoordinateSystem2d;
@@ -18,8 +19,7 @@ import panels.PanelLog;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static app.Colors.CROSSED_COLOR;
-import static app.Colors.SUBTRACTED_COLOR;
+import static app.Colors.*;
 
 /**
  * Класс задачи
@@ -36,6 +36,11 @@ private static final int POINT_SIZE = 3;
         points.clear();
         solved = false;
     }
+    /**
+     * Порядок разделителя сетки, т.е. раз в сколько отсечек
+     * будет нарисована увеличенная
+     */
+    private static final int DELIMITER_ORDER = 10;
     /**
      * Решить задачу
      */
@@ -97,6 +102,71 @@ private static final int POINT_SIZE = 3;
      */
     public boolean isSolved() {
         return solved;
+    }
+    /**
+     * Рисование сетки
+     *
+     * @param canvas   область рисования
+     * @param windowCS СК окна
+     */
+    public void renderGrid(Canvas canvas, CoordinateSystem2i windowCS) {
+        // сохраняем область рисования
+        canvas.save();
+        // получаем ширину штриха(т.е. по факту толщину линии)
+        float strokeWidth = 0.03f / (float) ownCS.getSimilarity(windowCS).y + 0.5f;
+        // создаём перо соответствующей толщины
+        try (var paint = new Paint().setMode(PaintMode.STROKE).setStrokeWidth(strokeWidth).setColor(TASK_GRID_COLOR)) {
+            // перебираем все целочисленные отсчёты нашей СК по оси X
+            for (int i = (int) (ownCS.getMin().x); i <= (int) (ownCS.getMax().x); i++) {
+                // находим положение этих штрихов на экране
+                Vector2i windowPos = windowCS.getCoords(i, 0, ownCS);
+                // каждый 10 штрих увеличенного размера
+                float strokeHeight = i % DELIMITER_ORDER == 0 ? 5 : 2;
+                // рисуем вертикальный штрих
+                canvas.drawLine(windowPos.x, windowPos.y, windowPos.x, windowPos.y + strokeHeight, paint);
+                canvas.drawLine(windowPos.x, windowPos.y, windowPos.x, windowPos.y - strokeHeight, paint);
+            }
+            // перебираем все целочисленные отсчёты нашей СК по оси Y
+            for (int i = (int) (ownCS.getMin().y); i <= (int) (ownCS.getMax().y); i++) {
+                // находим положение этих штрихов на экране
+                Vector2i windowPos = windowCS.getCoords(0, i, ownCS);
+                // каждый 10 штрих увеличенного размера
+                float strokeHeight = i % 10 == 0 ? 5 : 2;
+                // рисуем горизонтальный штрих
+                canvas.drawLine(windowPos.x, windowPos.y, windowPos.x + strokeHeight, windowPos.y, paint);
+                canvas.drawLine(windowPos.x, windowPos.y, windowPos.x - strokeHeight, windowPos.y, paint);
+            }
+        }
+        // восстанавливаем область рисования
+        canvas.restore();
+    }
+    /**
+     * Рисование задачи
+     *
+     * @param canvas   область рисования
+     * @param windowCS СК окна
+     */
+    private void renderTask(Canvas canvas, CoordinateSystem2i windowCS) {
+        canvas.save();
+        // создаём перо
+        try (var paint = new Paint()) {
+            for (Point p : points) {
+                if (!solved) {
+                    paint.setColor(p.getColor());
+                } else {
+                    if (crossed.contains(p))
+                        paint.setColor(CROSSED_COLOR);
+                    else
+                        paint.setColor(SUBTRACTED_COLOR);
+                }
+                // y-координату разворачиваем, потому что у СК окна ось y направлена вниз,
+                // а в классическом представлении - вверх
+                Vector2i windowPos = windowCS.getCoords(p.pos.x, p.pos.y, ownCS);
+                // рисуем точку
+                canvas.drawRect(Rect.makeXYWH(windowPos.x - POINT_SIZE, windowPos.y - POINT_SIZE, POINT_SIZE * 2, POINT_SIZE * 2), paint);
+            }
+        }
+        canvas.restore();
     }
 
     /**
@@ -205,7 +275,7 @@ private static final int POINT_SIZE = 3;
         this.single = new ArrayList<>();
     }
     /**
-     * Рисование задачи
+     * Рисование
      *
      * @param canvas   область рисования
      * @param windowCS СК окна
@@ -213,26 +283,9 @@ private static final int POINT_SIZE = 3;
     public void paint(Canvas canvas, CoordinateSystem2i windowCS) {
         // Сохраняем последнюю СК
         lastWindowCS = windowCS;
-
-        canvas.save();
-        // создаём перо
-        try (var paint = new Paint()) {
-            for (Point p : points) {
-                if (!solved) {
-                    paint.setColor(p.getColor());
-                } else {
-                    if (crossed.contains(p))
-                        paint.setColor(CROSSED_COLOR);
-                    else
-                        paint.setColor(SUBTRACTED_COLOR);
-                }
-                // y-координату разворачиваем, потому что у СК окна ось y направлена вниз,
-                // а в классическом представлении - вверх
-                Vector2i windowPos = windowCS.getCoords(p.pos.x, p.pos.y, ownCS);
-                // рисуем точку
-                canvas.drawRect(Rect.makeXYWH(windowPos.x - POINT_SIZE, windowPos.y - POINT_SIZE, POINT_SIZE * 2, POINT_SIZE * 2), paint);
-            }
-        }
-        canvas.restore();
+        // рисуем координатную сетку
+        renderGrid(canvas, lastWindowCS);
+        // рисуем задачу
+        renderTask(canvas, windowCS);
     }
 }
