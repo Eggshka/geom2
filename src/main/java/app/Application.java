@@ -2,6 +2,7 @@ package app;
 
 import controls.InputFactory;
 import controls.Label;
+import dialogs.PanelInfo;
 import io.github.humbleui.jwm.*;
 import io.github.humbleui.jwm.skija.EventFrameSkija;
 import io.github.humbleui.skija.Canvas;
@@ -18,8 +19,7 @@ import panels.PanelRendering;
 import java.io.File;
 import java.util.function.Consumer;
 
-import static app.Colors.APP_BACKGROUND_COLOR;
-import static app.Colors.PANEL_BACKGROUND_COLOR;
+import static app.Colors.*;
 
 /**
  * класс окна приложения
@@ -67,6 +67,31 @@ public static final int C_RAD_IN_PX = 4;
 
     private final Window window;
     /**
+     * Режимы работы приложения
+     */
+    public enum Mode {
+        /**
+         * Основной режим работы
+         */
+        WORK,
+        /**
+         * Окно информации
+         */
+        INFO,
+        /**
+         * работа с файлами
+         */
+        FILE
+    }
+    /**
+     * Текущий режим(по умолчанию рабочий)
+     */
+    public static Mode currentMode = Mode.WORK;
+    /**
+     * Панель информации
+     */
+    private final PanelInfo panelInfo;
+    /**
      * кнопка изменений: у мака - это `Command`, у windows - `Ctrl`
      */
     public static final KeyModifier MODIFIER = Platform.CURRENT == Platform.MACOS ? KeyModifier.MAC_COMMAND : KeyModifier.CONTROL;
@@ -112,6 +137,7 @@ public static final int C_RAD_IN_PX = 4;
                 "LayerGLSkija", "LayerRasterSkija"
         };
 
+
         for (String layerName : layerNames) {
             String className = "io.github.humbleui.jwm.skija." + layerName;
             try {
@@ -135,7 +161,10 @@ public static final int C_RAD_IN_PX = 4;
 
         if (window._layer == null)
             throw new RuntimeException("Нет доступных слоёв для создания");
+        // панель информации
+        panelInfo = new PanelInfo(window, true, DIALOG_BACKGROUND_COLOR, PANEL_PADDING);
     }
+
 
     /**
      * Обработчик событий
@@ -181,19 +210,31 @@ public static final int C_RAD_IN_PX = 4;
                 else
                     switch (eventKey.getKey()) {
                         case ESCAPE -> {
-                            window.close();
-                            // завершаем обработку, иначе уже разрушенный контекст
-                            // будет передан панелям
-                            return;
-
+                            // если сейчас основной режим
+                            if (currentMode.equals(Mode.WORK)) {
+                                // закрываем окно
+                                window.close();
+                                // завершаем обработку, иначе уже разрушенный контекст
+                                // будет передан панелям
+                                return;
+                            } else if (currentMode.equals(Mode.INFO)) {
+                                currentMode = Mode.WORK;
+                            }
                         }
                         case TAB -> InputFactory.nextTab();
                     }
             }
         }
-        panelControl.accept(e);
-        panelRendering.accept(e);
-        panelLog.accept(e);
+        switch (currentMode) {
+            case INFO -> panelInfo.accept(e);
+            case FILE -> {}
+            case WORK -> {
+                // передаём события на обработку панелям
+                panelControl.accept(e);
+                panelRendering.accept(e);
+                panelLog.accept(e);
+            }
+        }
     }
     /**
      * Рисование
@@ -211,6 +252,11 @@ public static final int C_RAD_IN_PX = 4;
         panelControl.paint(canvas, windowCS);
         panelLog.paint(canvas, windowCS);
         panelHelp.paint(canvas, windowCS);
+        // рисуем диалоги
+        switch (currentMode) {
+            case INFO -> panelInfo.paint(canvas, windowCS);
+            case FILE -> {}
+        }
         canvas.restore();
     }
 }
