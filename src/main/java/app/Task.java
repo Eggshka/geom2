@@ -5,10 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.github.humbleui.jwm.MouseButton;
-import io.github.humbleui.skija.Canvas;
-import io.github.humbleui.skija.Paint;
-import io.github.humbleui.skija.PaintMode;
-import io.github.humbleui.skija.Rect;
+import io.github.humbleui.skija.*;
 import lombok.Getter;
 import misc.CoordinateSystem2d;
 import misc.CoordinateSystem2i;
@@ -211,6 +208,10 @@ private static final int POINT_SIZE = 3;
      */
     protected CoordinateSystem2i lastWindowCS;
     /**
+     * коэффициент колёсика мыши
+     */
+    private static final float WHEEL_SENSITIVE = 0.001f;
+    /**
      * Клик мыши по пространству задачи
      *
      * @param pos         положение мыши
@@ -238,6 +239,57 @@ private static final int POINT_SIZE = 3;
      */
     @Getter
     private final ArrayList<Point> points;
+    /**
+     * Масштабирование области просмотра задачи
+     *
+     * @param delta  прокрутка колеса
+     * @param center центр масштабирования
+     */
+    public void scale(float delta, Vector2i center) {
+        if (lastWindowCS == null) return;
+        // получаем координаты центра масштабирования в СК задачи
+        Vector2d realCenter = ownCS.getCoords(center, lastWindowCS);
+        // выполняем масштабирование
+        ownCS.scale(1 + delta * WHEEL_SENSITIVE, realCenter);
+    }
+    /**
+     * Получить положение курсора мыши в СК задачи
+     *
+     * @param x        координата X курсора
+     * @param y        координата Y курсора
+     * @param windowCS СК окна
+     * @return вещественный вектор положения в СК задачи
+     */
+    @JsonIgnore
+    public Vector2d getRealPos(int x, int y, CoordinateSystem2i windowCS) {
+        return ownCS.getCoords(x, y, windowCS);
+    }
+    /**
+     * Рисование курсора мыши
+     *
+     * @param canvas   область рисования
+     * @param windowCS СК окна
+     * @param font     шрифт
+     * @param pos      положение курсора мыши
+     */
+    public void paintMouse(Canvas canvas, CoordinateSystem2i windowCS, Font font, Vector2i pos) {
+        // создаём перо
+        try (var paint = new Paint().setColor(TASK_GRID_COLOR)) {
+            // сохраняем область рисования
+            canvas.save();
+            // рисуем перекрестие
+            canvas.drawRect(Rect.makeXYWH(0, pos.y - 1, windowCS.getSize().x, 2), paint);
+            canvas.drawRect(Rect.makeXYWH(pos.x - 1, 0, 2, windowCS.getSize().y), paint);
+            // смещаемся немного для красивого вывода текста
+            canvas.translate(pos.x + 3, pos.y - 5);
+            // положение курсора в пространстве задачи
+            Vector2d realPos = getRealPos(pos.x, pos.y, lastWindowCS);
+            // выводим координаты
+            canvas.drawString(realPos.toString(), 0, 0, font, paint);
+            // восстанавливаем область рисования
+            canvas.restore();
+        }
+    }
     /**
      * Список точек в пересечении
      */

@@ -3,6 +3,7 @@ package misc;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import panels.PanelLog;
 
 import java.util.Objects;
 
@@ -73,7 +74,37 @@ public class CoordinateSystem2d {
         size = new Vector2d(sizeX, sizeY);
         max = Vector2d.sum(size, min);
     }
+    /**
+     * Масштабировать СК пропорционально
+     *
+     * @param s      коэффициент
+     * @param center центр масштабирования
+     */
+    public void scale(double s, Vector2d center) {
+        // если центр масштабирования находится вне СК
+        if (!checkCoords(center)) {
+            PanelLog.warning("центр масштабирования находится вне области");
+            return;
+        }
 
+        // рассчитываем новые размеры СК
+        Vector2d newSize = Vector2d.mul(size, s);
+
+        // получаем коэффициенты масштабирования
+        Vector2d k = new Vector2d(
+                (max.x - center.x) / (center.x - min.x),
+                (max.y - center.y) / (center.y - min.y)
+        );
+
+        // рассчитываем новые границы
+        double newXMin = center.x - newSize.x / (k.x + 1);
+        double newYMin = center.y - newSize.y / (k.y + 1);
+
+        double newXMax = center.x + newSize.x * k.x / (k.x + 1);
+        double newYMax = center.y + newSize.y * k.y / (k.y + 1);
+
+        set(newXMin, newYMin, newXMax - newXMin, newYMax - newYMin);
+    }
 
     /**
      * Получить случайные координаты внутри СК
