@@ -3,6 +3,7 @@ package app;
 import controls.InputFactory;
 import controls.Label;
 import dialogs.PanelInfo;
+import dialogs.PanelSelectFile;
 import io.github.humbleui.jwm.*;
 import io.github.humbleui.jwm.skija.EventFrameSkija;
 import io.github.humbleui.skija.Canvas;
@@ -100,6 +101,10 @@ public static final int C_RAD_IN_PX = 4;
      */
     private boolean maximizedWindow;
     /**
+     * Панель выбора файла
+     */
+    private final PanelSelectFile panelSelectFile;
+    /**
      * конструктор класса приложение
      */
     public Application() {
@@ -163,6 +168,8 @@ public static final int C_RAD_IN_PX = 4;
             throw new RuntimeException("Нет доступных слоёв для создания");
         // панель информации
         panelInfo = new PanelInfo(window, true, DIALOG_BACKGROUND_COLOR, PANEL_PADDING);
+        // Панель выбора файла
+        panelSelectFile = new PanelSelectFile(window, true, DIALOG_BACKGROUND_COLOR, PANEL_PADDING);
     }
 
 
@@ -227,7 +234,7 @@ public static final int C_RAD_IN_PX = 4;
         }
         switch (currentMode) {
             case INFO -> panelInfo.accept(e);
-            case FILE -> {}
+            case FILE -> panelSelectFile.accept(e);
             case WORK -> {
                 // передаём события на обработку панелям
                 panelControl.accept(e);
@@ -255,7 +262,7 @@ public static final int C_RAD_IN_PX = 4;
         // рисуем диалоги
         switch (currentMode) {
             case INFO -> panelInfo.paint(canvas, windowCS);
-            case FILE -> {}
+            case FILE -> panelSelectFile.paint(canvas, windowCS);
         }
         canvas.restore();
     }
