@@ -53,7 +53,7 @@ private static final int POINT_SIZE = 3;
                 Point a = points.get(i);
                 Point b = points.get(j);
                 // если точки совпадают по положению
-                if (a.pos.equals(b.pos) && !a.pointSet.equals(b.pointSet)) {
+                if (a.pos.equals(b.pos)) {
                     if (!crossed.contains(a)){
                         crossed.add(a);
                         crossed.add(b);
@@ -84,13 +84,12 @@ private static final int POINT_SIZE = 3;
      * Добавить точку
      *
      * @param pos      положение
-     * @param pointSet множество
      */
-    public void addPoint(Vector2d pos, Point.PointSet pointSet) {
+    public void addPoint(Vector2d pos) {
         solved = false;
-        Point newPoint = new Point(pos, pointSet);
+        Point newPoint = new Point(pos);
         points.add(newPoint);
-        PanelLog.info("точка " + newPoint + " добавлена в " + newPoint.getSetName());
+        PanelLog.info("точка " + newPoint + " добавлена в ");
     }
     /**
      * проверка, решена ли задача
@@ -189,9 +188,9 @@ private static final int POINT_SIZE = 3;
             Vector2d pos = ownCS.getCoords(gridPos, addGrid);
             // сработает примерно в половине случаев
             if (ThreadLocalRandom.current().nextBoolean())
-                addPoint(pos, Point.PointSet.FIRST_SET);
+                addPoint(pos);
             else
-                addPoint(pos, Point.PointSet.SECOND_SET);
+                addPoint(pos);
         }
     }
 
@@ -223,10 +222,10 @@ private static final int POINT_SIZE = 3;
         Vector2d taskPos = ownCS.getCoords(pos, lastWindowCS);
         // если левая кнопка мыши, добавляем в первое множество
         if (mouseButton.equals(MouseButton.PRIMARY)) {
-            addPoint(taskPos, Point.PointSet.FIRST_SET);
+            addPoint(taskPos);
             // если правая, то во второе
         } else if (mouseButton.equals(MouseButton.SECONDARY)) {
-            addPoint(taskPos, Point.PointSet.SECOND_SET);
+            addPoint(taskPos);
         }
     }
     /**

@@ -98,11 +98,11 @@ public class PanelControl extends GridPanel {
                 FIELD_TEXT_COLOR, true);
         inputs.add(yField);
         buttons = new ArrayList<>();
-        Button addToFirstSet = new Button(
+        Button addToSet = new Button(
                 window, false, backgroundColor, PANEL_PADDING,
-                6, 7, 0, 3, 3, 1, "Добавить в первое\nмножество",
+                6, 7, 2, 3, 3, 1, "Добавить точку",
                 true, true);
-        addToFirstSet.setOnClick(() -> {
+        addToSet.setOnClick(() -> {
             // если числа введены верно
             if (!xField.hasValidDoubleValue()) {
                 PanelLog.warning("X координата введена неверно");
@@ -110,28 +110,11 @@ public class PanelControl extends GridPanel {
                 PanelLog.warning("Y координата введена неверно");
             else
                 PanelRendering.task.addPoint(
-                        new Vector2d(xField.doubleValue(), yField.doubleValue()), Point.PointSet.FIRST_SET
+                        new Vector2d(xField.doubleValue(), yField.doubleValue())
                 );
         });
-        buttons.add(addToFirstSet);
+        buttons.add(addToSet);
 
-        Button addToSecondSet = new Button(
-                window, false, backgroundColor, PANEL_PADDING,
-                6, 7, 3, 3, 3, 1, "Добавить во второе\nмножество",
-                true, true);
-        addToSecondSet.setOnClick(() -> {
-            // если числа введены верно
-            if (!xField.hasValidDoubleValue()) {
-                PanelLog.warning("X координата введена неверно");
-            } else if (!yField.hasValidDoubleValue())
-                PanelLog.warning("Y координата введена неверно");
-            else {
-                PanelRendering.task.addPoint(
-                        new Vector2d(xField.doubleValue(), yField.doubleValue()), Point.PointSet.SECOND_SET
-                );
-            }
-        });
-        buttons.add(addToSecondSet);
         // случайное добавление
         Label cntLabel = new Label(window, false, backgroundColor, PANEL_PADDING,
                 6, 7, 0, 4, 1, 1, "Кол-во", true, true);
